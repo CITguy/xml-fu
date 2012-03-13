@@ -1,3 +1,7 @@
+### 0.1.1
+
+* Rescue false positives when setting Node.value with interaction with ActiveSupport
+
 ### 0.1.0
 
 * Initial version. born as a replacement of 
