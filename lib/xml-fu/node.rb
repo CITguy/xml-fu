@@ -118,6 +118,8 @@ module XmlFu
       else
         @value = val.to_s
       end
+    rescue => e
+      @value = val.to_s
     end#value=
 
     # @return [String, nil]
