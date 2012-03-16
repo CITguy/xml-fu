@@ -7,7 +7,7 @@
   * Hash iteration logic reduced to a single Node call
 * Node
   * New attribute: "content_type"
-  * Special tag characters (\*, \/, !) can be mixed and matched
+  * Special tag characters (\*, /, !) can be mixed and matched
     * "foo/\*" will return a collection of <foo/> siblings
 * 12 new spec tests
 * Removed development dependencies for:
