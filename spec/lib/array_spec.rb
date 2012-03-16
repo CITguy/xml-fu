@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe XmlFu::Array do
-
   describe ".to_xml" do
     #after do
     #  XmlFu.infer_simple_value_nodes = false

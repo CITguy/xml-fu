@@ -33,8 +33,10 @@ describe XmlFu::Hash do
 
     describe "with a key that will contain multiple nodes" do
       describe "when key explicitly denotes value is a collection" do
-        hash = { "foo*" => ["bar", "biz"] }
-        XmlFu::Hash.to_xml(hash).should == "<foo>bar</foo><foo>biz</foo>"
+        it "should return the correct collection" do
+          hash = { "foo*" => ["bar", "biz"] }
+          XmlFu::Hash.to_xml(hash).should == "<foo>bar</foo><foo>biz</foo>"
+        end
       end
 
       describe "when key denotes value contains children" do

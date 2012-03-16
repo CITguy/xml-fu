@@ -2,6 +2,12 @@ require 'spec_helper'
 
 describe XmlFu do
   describe ".xml" do
+    it "should return nil for value that isn't a Hash or Array" do
+      XmlFu.xml(1).should == nil
+      XmlFu.xml(nil).should == nil
+      XmlFu.xml(Object.new).should == nil
+    end
+
     it "translates a given Hash to XML" do
       XmlFu.xml( :id => 1 ).should == "<id>1</id>"
     end
@@ -41,6 +47,16 @@ describe XmlFu do
       XmlFu.xml(hash).should == "<foo bar=\"biz\"></foo><foo biz=\"bang\"></foo>"
     end
 
+    it "should return list of self-closing nodes" do
+      hash = {
+        "foo/*" => [
+          {"@bar" => "biz"},
+          {"@biz" => "bang"}
+        ]
+      }
+      XmlFu.xml(hash).should == "<foo bar=\"biz\"/><foo biz=\"bang\"/>"
+    end
+
     it "should ignore nested values for content array" do
       output = XmlFu.xml("foo/" => [{:bar => "biz"}, {:bar => "biz"}])
       output.should == "<foo/>"
@@ -53,7 +69,6 @@ describe XmlFu do
       output = XmlFu.xml("foo/" => {"@id" => "0"})
       output.should == "<foo id=\"0\"/>"
     end
-
   end
 
   describe "configure" do
@@ -71,5 +86,4 @@ describe XmlFu do
     XmlFu.infer_simple_value_nodes = false
     XmlFu.infer_simple_value_nodes.should == false
   end
-
 end

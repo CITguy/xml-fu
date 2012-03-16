@@ -5,13 +5,12 @@ require "xml-fu/array"
 module XmlFu
   class << self
     
-    @@infer_simple_value_nodes = false
-
     # Convert construct into XML
     def xml(construct, options={})
       case construct
       when ::Hash   then Hash.to_xml( construct.dup, options )
       when ::Array  then Array.to_xml( construct.dup, options )
+      else nil
       end
     end#convert
 
@@ -25,12 +24,18 @@ module XmlFu
     # an array of one hash (the root node hash)
     #
     #     <foo><bar/><baz/></foo> => [{"foo" => [{"bar/" => ""},{"baz/" => ""}] }]
-    def hash(xml, options)
+    def parse(xml, options)
     end
 
     def configure
       yield self
     end
+
+    ################################################################################
+    ## CONFIGURATIONS
+    ################################################################################
+    
+    @@infer_simple_value_nodes = false
 
     # Set configuration option to be used with future releases
     def infer_simple_value_nodes=(val)

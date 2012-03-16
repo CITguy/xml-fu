@@ -24,10 +24,6 @@ module XmlFu
           raise(MissingKeyException, "Key name missing for collection") if key.empty?
           
           case 
-          when key[-1,1] == "/"
-            xml << Node.new(key, nil, attributes).to_xml
-          when ::Hash === item
-            xml.tag!(key, attributes) { xml << Hash.to_xml(item,options) }
           when ::Array === item
             xml << Array.to_xml(item.flatten,options)
           else
@@ -42,9 +38,10 @@ module XmlFu
             xml << Array.to_xml(item, options)
           when XmlFu.infer_simple_value_nodes == true
             xml << infer_node(item, attributes)
+          when item.respond_to?(:to_xml)
+            xml << item.to_xml
           else
-            # only act on item if it responds to to_xml
-            xml << item.to_xml if item.respond_to?(:to_xml)
+            # unknown xml tranfromation process
           end
         end
       end
@@ -83,11 +80,14 @@ module XmlFu
 
         if item.respond_to?(:keys)
           filtered = Hash.filter(item)
-          attributes = filtered.last
-          item_content = filtered.first
+          item_content, attributes = filtered.first, filtered.last
         end
 
-        yield xml, key, item_content, attributes
+        item_name = ( Symbol === key ?
+                     XmlFu::Node.symbol_conversion_algorithm.call(key) :
+                     key.to_s )
+
+        yield xml, item_name, item_content, attributes
       end
 
       xml.target!

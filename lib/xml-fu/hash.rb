@@ -11,33 +11,8 @@ module XmlFu
 
     # Convert Hash to XML String
     def self.to_xml(hash, options={})
-      each_with_xml hash do |xml, key, value, attributes|
-        # Use symbol conversion algorithm to set tag name
-        tag_name = ( Symbol === key ?
-                     XmlFu::Node.symbol_conversion_algorithm.call(key) :
-                     key.to_s )
-
-        case
-        when tag_name[-1,1] == "/"
-          xml << Node.new(tag_name, nil, attributes).to_xml
-        when ::Array === value
-          if tag_name[-1,1] == '*'
-            options.merge!({
-              :content_type => "collection",
-              :key => tag_name.chop,
-              :attributes => attributes
-            })
-            # Collection is merely a set of sibling nodes
-            xml << Array.to_xml(value.flatten, options)
-          else
-            # Contents will contain a parent node
-            xml.tag!(tag_name, attributes) { xml << Array.to_xml(value, options) }
-          end
-        when ::Hash === value 
-          xml.tag!(tag_name, attributes) { xml << Hash.to_xml(value, options) }
-        else 
-          xml << Node.new(tag_name, value, attributes).to_xml
-        end
+      each_with_xml hash do |xml, name, value, attributes|
+        xml << Node.new(name, value, attributes).to_xml 
       end
     end#self.to_xml
 
@@ -72,11 +47,15 @@ module XmlFu
         # yank the attribute keys into their own hash
         if value.respond_to?(:keys)
           filtered = Hash.filter(value)
-          node_attrs = filtered.last
-          node_value = filtered.first
+          node_value, node_attrs = filtered.first, filtered.last
         end
 
-        yield xml, key, node_value, node_attrs
+        # Use symbol conversion algorithm to set tag name
+        node_name = ( Symbol === key ?
+                     XmlFu::Node.symbol_conversion_algorithm.call(key) :
+                     key.to_s )
+
+        yield xml, node_name, node_value, node_attrs
       end
 
       xml.target!

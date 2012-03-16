@@ -39,6 +39,7 @@ module XmlFu
 
     attr_accessor :escape_xml
     attr_accessor :self_closing
+    attr_accessor :content_type
 
     # Create XmlFu::Node object
     # @param [String, Symbol] name Name of node
@@ -47,6 +48,7 @@ module XmlFu
     def initialize(name, value, attributes={})
       @escape_xml = true
       @self_closing = false
+      @content_type = "container"
       self.attributes = attributes
       self.value = value
       self.name = name
@@ -85,21 +87,25 @@ module XmlFu
     def name_parse_special_characters(val)
       use_this = val.dup
 
-      # Will this be a self closing node?
-      if use_this.to_s[-1,1] == '/'
-        @self_closing = true 
-        use_this.chop!
-      end
-
-      # Will this node contain escaped XML?
-      if use_this.to_s[-1,1] == '!'
-        @escape_xml = false
-        use_this.chop!
-      end
-
       # Ensure that we don't have special characters at end of name
       while ["!","/","*"].include?(use_this.to_s[-1,1]) do
-        use_this.chop!
+        # Will this node contain escaped XML?
+        if use_this.to_s[-1,1] == '!'
+          @escape_xml = false
+          use_this.chop!
+        end
+
+        # Will this be a self closing node?
+        if use_this.to_s[-1,1] == '/'
+          @self_closing = true 
+          use_this.chop!
+        end
+
+        # Will this node contain a collection of sibling nodes?
+        if use_this.to_s[-1,1] == '*'
+          @content_type = "collection"
+          use_this.chop!
+        end
       end
 
       return use_this
@@ -107,16 +113,22 @@ module XmlFu
 
     # Custom Setter for @value instance method
     def value=(val)
-      if DateTime === val || Time === val || Date === val
-        @value = val.strftime XS_DATETIME_FORMAT
-      elsif val.respond_to?(:to_datetime)
-        @value = val.to_datetime
-      elsif val.respond_to?(:call)
-        @value = val.call
-      elsif val.nil?
-        @value = nil
+      case val
+      when ::Hash     then @value = val
+      when ::Array    then @value = val
+      when ::DateTime then @value = val.strftime XS_DATETIME_FORMAT
+      when ::Time     then @value = val.strftime XS_DATETIME_FORMAT
+      when ::Date     then @value = val.strftime XS_DATETIME_FORMAT
       else
-        @value = val.to_s
+        if val.respond_to?(:to_datetime)
+          @value = val.to_datetime
+        elsif val.respond_to?(:call)
+          @value = val.call
+        elsif val.nil?
+          @value = nil
+        else
+          @value = val.to_s
+        end
       end
     rescue => e
       @value = val.to_s
@@ -133,9 +145,27 @@ module XmlFu
     def to_xml
       xml = Builder::XmlMarkup.new
       case
-      when @self_closing  then xml.tag!(@name, @attributes)
-      when @value.nil?    then xml.tag!(@name, @attributes.merge!("xsi:nil" => "true"))
-      else                     xml.tag!(@name, @attributes) { xml << self.value }
+      when @self_closing && @content_type == 'container'
+        xml.tag!(@name, @attributes)
+      when @value.nil? 
+        xml.tag!(@name, @attributes.merge!("xsi:nil" => "true"))
+      when ::Hash === @value
+        xml.tag!(@name, @attributes) { xml << XmlFu::Hash.to_xml(@value) }
+      when ::Array === @value
+        case @content_type
+        when "collection"
+          xml << XmlFu::Array.to_xml(@value.flatten, { 
+            :key => (@self_closing ? "#{@name}/" : @name),
+            :attributes => @attributes,
+            :content_type => "collection"
+          })
+        when "container"
+          xml.tag!(@name, @attributes) { xml << XmlFu::Array.to_xml(@value) }
+        else
+          # Shouldn't be anything else
+        end
+      else
+        xml.tag!(@name, @attributes) { xml << self.value }
       end
       xml.target!
     end#to_xml
