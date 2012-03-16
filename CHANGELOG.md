@@ -1,3 +1,7 @@
+### 0.1.5
+
+* Fix false positive for Node value responding to "to_datetime" by checking explicitly for String values before hand.
+
 ### 0.1.4
 
 * Bug Fix with converting non-Array, non-Hash values to their proper XML string equivalent.

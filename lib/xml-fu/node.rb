@@ -114,6 +114,7 @@ module XmlFu
     # Custom Setter for @value instance method
     def value=(val)
       case val
+      when ::String   then @value = val.to_s
       when ::Hash     then @value = val
       when ::Array    then @value = val
       when ::DateTime then @value = val.strftime XS_DATETIME_FORMAT
