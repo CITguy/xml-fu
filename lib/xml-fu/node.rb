@@ -165,7 +165,7 @@ module XmlFu
           # Shouldn't be anything else
         end
       else
-        xml.tag!(@name, @attributes) { xml << self.value }
+        xml.tag!(@name, @attributes) { xml << self.value.to_s }
       end
       xml.target!
     end#to_xml

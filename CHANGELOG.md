@@ -1,3 +1,7 @@
+### 0.1.4
+
+* Bug Fix with converting non-Array, non-Hash values to their proper XML string equivalent.
+
 ### 0.1.2
 
 * Additional nesting support
