@@ -1,4 +1,4 @@
-# Xml::Fu
+# XmlFu
 
 Convert Ruby Hashes to XML
 
