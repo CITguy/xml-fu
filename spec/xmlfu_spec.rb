@@ -29,11 +29,11 @@ describe XmlFu do
     it "should return correct value based on nested array of hashes" do
       hash = {
         "SecretAgents" => [
-          {"agent/" => {"@id"=>"006", "@name"=>"Alec Trevelyan"}}, 
-          {"agent/" => {"@id"=>"007", "@name"=>"James Bond"}}
+          {"agent/" => {"@name"=>"Alec Trevelyan"}}, 
+          {"agent/" => {"@name"=>"James Bond"}}
         ]
       }
-      expected = "<SecretAgents><agent name=\"Alec Trevelyan\" id=\"006\"/><agent name=\"James Bond\" id=\"007\"/></SecretAgents>" 
+      expected = "<SecretAgents><agent name=\"Alec Trevelyan\"/><agent name=\"James Bond\"/></SecretAgents>" 
       XmlFu.xml(hash).should == expected
     end
 
