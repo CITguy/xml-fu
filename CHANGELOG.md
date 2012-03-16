@@ -8,7 +8,7 @@
 * Node
   * New attribute: "content_type"
   * Special tag characters (\*, /, !) can be mixed and matched
-    * "foo/\*" will return a collection of <foo/> siblings
+    * "foo/\*" will return a collection of &lt;foo/&gt; siblings
 * 12 new spec tests
 * Removed development dependencies for:
   * autotest
