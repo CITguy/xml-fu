@@ -1,3 +1,7 @@
+### 0.1.6
+
+* Added :instruct option for adding XML doctype instruction to generated XML
+
 ### 0.1.5
 
 * Fix false positive for Node value responding to "to_datetime" by checking explicitly for String values before hand.
