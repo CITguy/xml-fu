@@ -11,7 +11,7 @@ module XmlFu
 
     # Convert Hash to XML String
     def self.to_xml(hash, options={})
-      each_with_xml hash do |xml, name, value, attributes|
+      each_with_xml hash, options do |xml, name, value, attributes|
         xml << Node.new(name, value, attributes).to_xml 
       end
     end#self.to_xml
@@ -37,8 +37,10 @@ module XmlFu
 
     # Provides a convenience function to iterate over the hash
     # Logic will filter out attribute and content keys from hash values
-    def self.each_with_xml(hash)
+    def self.each_with_xml(hash, opts)
       xml = Builder::XmlMarkup.new
+      xml.instruct! if opts[:instruct] == true
+      opts.delete(:instruct)
 
       hash.each do |key,value|
         node_value = value

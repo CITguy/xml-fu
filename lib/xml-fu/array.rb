@@ -69,6 +69,9 @@ module XmlFu
     # @param [Hash] opts Hash of options to pass to the iteration
     def self.each_with_xml(arr, opts={})
       xml = Builder::XmlMarkup.new
+      xml.instruct! if opts[:instruct] == true
+      opts.delete(:instruct)
+
 
       arr.each do |item|
         key = opts.fetch(:key, "")

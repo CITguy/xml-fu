@@ -3,8 +3,14 @@ require 'spec_helper'
 describe XmlFu::Hash do
 
   describe ".to_xml" do
-    it "for a simple Hash" do
-      XmlFu::Hash.to_xml(:some => "body").should == "<some>body</some>"
+    it "should return plain xml with simple args" do
+      result = XmlFu::Hash.to_xml({:foo=>"bar"})
+      result.should == "<foo>bar</foo>"
+    end
+
+    it "should add XML doctype if :instruct => true" do
+      result = XmlFu::Hash.to_xml({:foo=>"bar"}, :instruct => true)
+      result.should == "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo>bar</foo>"
     end
 
     it "for a nested Hash" do

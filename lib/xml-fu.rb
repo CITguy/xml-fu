@@ -24,7 +24,10 @@ module XmlFu
     # an array of one hash (the root node hash)
     #
     #     <foo><bar/><baz/></foo> => [{"foo" => [{"bar/" => ""},{"baz/" => ""}] }]
-    def parse(xml, options)
+    def parse(xml=nil, options={})
+      parsed_xml = xml
+
+      return Array(parsed_xml)
     end
 
     def configure

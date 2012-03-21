@@ -77,13 +77,22 @@ describe XmlFu do
         xf.should respond_to(:infer_simple_value_nodes)
       end
     end
+
+    it "should set XmlFu Module variable 'infer_simple_value_nodes'" do
+      XmlFu.infer_simple_value_nodes.should == false
+      XmlFu.infer_simple_value_nodes = true
+      XmlFu.infer_simple_value_nodes.should == true
+      XmlFu.infer_simple_value_nodes = false
+      XmlFu.infer_simple_value_nodes.should == false
+    end
   end
 
-  it "should set XmlFu Module variable 'infer_simple_value_nodes'" do
-    XmlFu.infer_simple_value_nodes.should == false
-    XmlFu.infer_simple_value_nodes = true
-    XmlFu.infer_simple_value_nodes.should == true
-    XmlFu.infer_simple_value_nodes = false
-    XmlFu.infer_simple_value_nodes.should == false
+  describe ".parse" do
+    it "should always return an array" do
+      ::Array === XmlFu.parse()
+      ::Array === XmlFu.parse("foo")
+      ::Array === XmlFu.parse("foo", {:bar => true})
+    end
   end
+
 end

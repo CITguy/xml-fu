@@ -243,7 +243,7 @@ XmlFu.xml(
 Since with simple values, you cannot infer the value of their node container purely on their value, simple values
 are currently ignored in arrays and only Hashes are translated.
 
-``` ruby
+```ruby
   "foo" => [
     {:bar => "biz"},
     nil, # ignored
@@ -257,10 +257,14 @@ are currently ignored in arrays and only Hashes are translated.
   #=> "<foo><bar>biz</bar></foo>"
 ```
 
+## Options
+* **:instruct** => true
+  * Adds &lt;xml version="1.0" encoding="UTF-8"?&gt; to generated XML
 
-### Cheat Sheet
 
-#### Key
+## Cheat Sheet
+
+### Key
   1. if key denotes self-closing node (key/)
     * attributes are preserved with Hash values
     * value and "=" values are ignored
@@ -273,7 +277,7 @@ are currently ignored in arrays and only Hashes are translated.
     * Array is flattened
     * Only Hash items in array are translated
 
-#### Value
+### Value
   1. if value is Hash:
     * "@" keys are attributes of the node
     * "=" key can be used in conjunction with any "@" keys to specify content of node

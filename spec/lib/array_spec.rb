@@ -27,6 +27,19 @@ describe XmlFu::Array do
     #  XmlFu.infer_simple_value_nodes = false
     #end
 
+    it "should return plain xml with simple args" do
+      result = XmlFu::Array.to_xml([{:foo => "bar"}])
+      result.should == "<foo>bar</foo>"
+    end
+
+    it "should add XML doctype when :instruct => true" do
+      result = XmlFu::Array.to_xml([{:foo => "bar"}], :instruct => true)
+      result.should == "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo>bar</foo>"
+
+      result = XmlFu.xml([{:foo => "bar"}], :instruct => true)
+      result.should == "<?xml version=\"1.0\" encoding=\"UTF-8\"?><foo>bar</foo>"
+    end
+
     it "should flatten nested arrays properly" do
       hash = { 
         :foo => [
