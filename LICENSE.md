@@ -1,7 +1,8 @@
 Copyright (c) 2012 Ryan Johnson
+
 Copyright (c) 2010 Daniel Harrington (for logic inspired by Gyoku)
 
-MIT License
+## MIT License
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

@@ -1,3 +1,12 @@
+## Changes by Version
+
+### 0.1.7
+
+* Added pass through for Builder::XmlMarkup options via XmlFu.xml
+  * :indent
+  * :margin
+* Refactored Builder::XmlMarkup creation logic into separate class
+
 ### 0.1.6
 
 * Added :instruct option for adding XML doctype instruction to generated XML

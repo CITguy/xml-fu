@@ -1,6 +1,7 @@
 #require "xml-fu/version"
 require "xml-fu/hash"
 require "xml-fu/array"
+require "xml-fu/markup"
 
 module XmlFu
   class << self

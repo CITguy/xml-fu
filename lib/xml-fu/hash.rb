@@ -37,10 +37,8 @@ module XmlFu
 
     # Provides a convenience function to iterate over the hash
     # Logic will filter out attribute and content keys from hash values
-    def self.each_with_xml(hash, opts)
-      xml = Builder::XmlMarkup.new
-      xml.instruct! if opts[:instruct] == true
-      opts.delete(:instruct)
+    def self.each_with_xml(hash, opts={})
+      xml = XmlFu::Markup.new(opts)
 
       hash.each do |key,value|
         node_value = value
