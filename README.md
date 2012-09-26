@@ -45,7 +45,7 @@ liking by setting the XmlFu.symbol\_conversion\_algorithm to a lambda or proc of
 
 ```ruby
 # Built-in Algorithm
-XmlFu.symbol_conversion_algorithm(:camelcase)
+XmlFu::Node.symbol_conversion_algorithm = :camelcase
 
 XmlFu.xml( :foo => "bar" ) #=> "<foo>bar</foo>"
 XmlFu.xml( "foo" => "bar" ) #=> "<foo>bar</foo>"
