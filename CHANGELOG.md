@@ -1,5 +1,8 @@
 ## Changes by Version
 
+### 0.1.9
+
+* Added license to gemspec
 
 ### 0.1.8
 

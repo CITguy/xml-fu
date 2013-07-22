@@ -1,5 +1,7 @@
 # XmlFu [![Build Status](https://travis-ci.org/CITguy/xml-fu.png?branch=master)](https://travis-ci.org/CITguy/xml-fu)
 
+*license:* MIT
+
 Convert Ruby Hashes to XML
 
 A hash is meant to be a structured set of data. So is XML. The two are very similar in that they have
