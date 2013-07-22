@@ -8,9 +8,10 @@ Gem::Specification.new do |gem|
   gem.email         = ["rhino.citguy@gmail.com"]
   gem.homepage      = "http://github.com/CITguy/#{gem.name}"
   gem.summary       = %q{Simple Hash/Array to XML generation}
+  gem.license       = 'MIT'
   gem.description   = %q{
-    Inspired by the Gyoku gem for hash to xml conversion, 
-    XmlFu is designed to require no meta tagging for 
+    Inspired by the Gyoku gem for hash to xml conversion,
+    XmlFu is designed to require no meta tagging for
     node attributes and content. (i.e. no :attributes! and no :order!)
   }
 
