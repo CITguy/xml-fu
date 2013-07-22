@@ -1,5 +1,6 @@
 ## Changes by Version
 
+
 ### 0.1.8
 
 * Fixed XmlFu.symbol_conversion_algorithm functionality
