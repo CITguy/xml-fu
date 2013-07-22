@@ -2,7 +2,7 @@
 
 Convert Ruby Hashes to XML
 
-A hash is meant to be a structured set of data. So is XML. The two are very similar in that they have 
+A hash is meant to be a structured set of data. So is XML. The two are very similar in that they have
 the capability of nesting information within a tree structure. With XML you have nodes. With Hashes, you
 have key/value pairs. The value of an XML node is referenced by its parent's name. A hash value is referenced
 by its key. This basic lesson tells the majority of what you need to know about creating XML via Hashes in
@@ -29,30 +29,53 @@ Or install it yourself as:
 Hash keys are translated into XML nodes (whether it be a document node or attribute node).
 
 
-### Translation
+### Key Translation
 
-With Ruby, a hash key may be a string or a symbol. XmlFu will convert the symbols into an XML safe name 
-by lower camel-casing them. So :foo\_bar will become "fooBar". You may change the conversion algorithm to your
-liking by setting the XmlFu.symbol\_conversion\_algorithm to a lambda or proc of your liking.
+With Ruby, a hash key may be a string or a symbol.  **Strings will be preserved** as they may
+contain node namespacing ("foo:Bar" would need preserved rather than converted).  Symbols will
+be converted into an XML safe name by lower camel-casing them. So :foo\_bar will become "fooBar".
+You may change the conversion algorithm to your liking by setting the
+XmlFu.symbol\_conversion\_algorithm to a lambda or proc of your liking.
 
 
 #### Built-In Algorithms
 
-* :lower\_camelcase **(default)**
+For a complete list, reference XmlFu::Node::ALGORITHMS
+
 * :camelcase
+* :downcase
+* :lower\_camelcase **(default)**
 * :none (result of :sym.to\_s)
-* :snake\_case (alias for :none)
+* :upcase
 
 ```ruby
-# Built-in Algorithm
-XmlFu.symbol_conversion_algorithm(:camelcase)
+# Default Algorithm (:lower_camelcase)
+XmlFu.xml( :FooBar => "bang" ) #=> "<fooBar>bang</fooBar>"
+XmlFu.xml( :foo_bar => "bang" ) #=> "<fooBar>bang</fooBar>"
 
-XmlFu.xml( :foo => "bar" ) #=> "<foo>bar</foo>"
-XmlFu.xml( "foo" => "bar" ) #=> "<foo>bar</foo>"
-# :foo and "foo" both translate to <foo>
+
+# Built-in Algorithms (:camelcase)
+XmlFu.symbol_conversion_algorithm = :camelcase
+XmlFu.xml( :Foo_Bar => "bang" ) #=> "<FooBar>bang</FooBar>"
+XmlFu.xml( :foo_bar => "bang" ) #=> "<FooBar>bang</FooBar>"
+
+
+# Built-in Algorithms (:downcase)
+XmlFu.symbol_conversion_algorithm = :downcase
+XmlFu.xml( :foo_bar => "bang" ) #=> "<foo_bar>bang</foo_bar>"
+XmlFu.xml( :Foo_Bar => "bang" ) #=> "<foo_bar>bang</foo_bar>"
+XmlFu.xml( :FOO => "bar" ) #=> "<foo>bar</foo>"
+
+
+# Built-in Algorithms (:upcase)
+XmlFu.symbol_conversion_algorithm = :upcase
+XmlFu.xml( :foo_bar => "bang" ) #=> "<FOO_BAR>bang</FOO_BAR>"
+XmlFu.xml( :Foo_Bar => "bang" ) #=> "<FOO_BAR>bang</FOO_BAR>"
+XmlFu.xml( :foo => "bar" ) #=> "<FOO>bar</FOO>"
+
 
 # Custom Algorithm
-XmlFu.symbol_conversion_algorithm {|sym| sym.downcase }
+XmlFu.symbol_conversion_algorithm = lambda {|sym| sym.do_something_special }
 ```
 
 ### Types of Nodes
@@ -91,14 +114,14 @@ XmlFu.xml("foo!" => "<bar/>") #=> "<foo><bar/></foo>"
 
 #### Attribute Node (@key)
 
-Yes, the attributes of an XML node are nodes themselves, so we need a way of defining them. Since XPath syntax 
+Yes, the attributes of an XML node are nodes themselves, so we need a way of defining them. Since XPath syntax
 uses @ to denote an attribute, so does XmlFu.
 
 ``` ruby
-XmlFu.xml(:agent => { 
-  "@id" => "007", 
-  "FirstName" => "James", 
-  "LastName" => "Bond" 
+XmlFu.xml(:agent => {
+  "@id" => "007",
+  "FirstName" => "James",
+  "LastName" => "Bond"
 })
 #=> <agent id="007"><FirstName>James</FirstName><LastName>Bond</LastName></agent>
 ```
@@ -156,7 +179,7 @@ XmlFu.xml(:agent => {"@id" => "007", "=" => "James Bond"})
 #=> "<agent id=\"007\">James Bond</agent>"
 ```
 
-This key will not get around the self-closing node rule. The only nodes that will be used in this case will be 
+This key will not get around the self-closing node rule. The only nodes that will be used in this case will be
 attribute nodes and additional content will be ignored.
 
 ```ruby
@@ -167,7 +190,7 @@ XmlFu.xml("foo/" => {"@id" => "123", "=" => "You can't see me."})
 
 ### Arrays
 
-Since the value in a key/value pair is (for the most part) used as the contents of a key/node, there are some 
+Since the value in a key/value pair is (for the most part) used as the contents of a key/node, there are some
 assumptions that XmlFu makes when dealing with Array values.
 
 * For a typical key, the contents of the array are considered to be nodes to be contained within the <key> node.
@@ -177,7 +200,7 @@ assumptions that XmlFu makes when dealing with Array values.
 
 ``` ruby
 XmlFu.xml( "SecretAgents" => [
-  { "agent/" => { "@id"=>"006", "@name"=>"Alec Trevelyan" } }, 
+  { "agent/" => { "@id"=>"006", "@name"=>"Alec Trevelyan" } },
   { "agent/" => { "@id"=>"007", "@name"=>"James Bond" } }
 ])
 #=> "<SecretAgents><agent name=\"Alec Trevelyan\" id=\"006\"/><agent name=\"James Bond\" id=\"007\"/></SecretAgents>"
@@ -202,12 +225,12 @@ How about a more complex example:
 
 ```ruby
 XmlFu.xml(
-  "person*" => { 
-    "@foo" => "bar", 
+  "person*" => {
+    "@foo" => "bar",
     "=" => [
-      {"@foo" => "nope", "=" => "Bob"}, 
+      {"@foo" => "nope", "=" => "Bob"},
       "Sheila"
-    ] 
+    ]
   }
 )
 #=> "<person foo=\"nope\">Bob</person><person foo=\"bar\">Sheila</person>"
@@ -268,7 +291,7 @@ are currently ignored in arrays and only Hashes are translated.
   1. if key denotes self-closing node (key/)
     * attributes are preserved with Hash values
     * value and "=" values are ignored
-  2. if key denotes collection (key*) with Array value 
+  2. if key denotes collection (key*) with Array value
     * Array is flattened
     * Only Hash and Simple values are translated
     * Hashes may override default attributes set by parent

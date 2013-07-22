@@ -1,5 +1,15 @@
 ## Changes by Version
 
+### 0.1.8
+
+* Fixed XmlFu.symbol_conversion_algorithm functionality
+* Added specs for above
+* Removed :snake_case algorithm
+** It never worked and can be implemented via a custom algorithm.
+* Added :upcase algorithm
+* Added :downcase algorithm
+* Updated README
+
 ### 0.1.7
 
 * Added pass through for Builder::XmlMarkup options via XmlFu.xml
@@ -41,9 +51,9 @@
 
 ### 0.1.0
 
-* Initial version. born as a replacement of 
+* Initial version. born as a replacement of
   [Gyoku](http://www.rubygems.org/gems/gyoku)
   with corrected assumptions about Array values and
   no need for meta tags such as:
-  * :order! 
+  * :order!
   * :attributes!

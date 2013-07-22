@@ -5,7 +5,7 @@ require "xml-fu/markup"
 
 module XmlFu
   class << self
-    
+
     # Convert construct into XML
     def xml(construct, options={})
       case construct
@@ -16,7 +16,7 @@ module XmlFu
     end#convert
 
     # @todo Add Nori-like parsing capability to convert XML back into XmlFu-compatible Hash/Array
-    # Parse XML into array of hashes.  If XML used as input contains only sibling nodes, output 
+    # Parse XML into array of hashes.  If XML used as input contains only sibling nodes, output
     # will be array of hashes corresponding to those sibling nodes.
     #
     #     <foo/><bar/> => [{"foo/" => ""}, {"bar/" => ""}]
@@ -38,7 +38,7 @@ module XmlFu
     ################################################################################
     ## CONFIGURATIONS
     ################################################################################
-    
+
     @@infer_simple_value_nodes = false
 
     # Set configuration option to be used with future releases
@@ -57,6 +57,19 @@ module XmlFu
     def infer_simple_value_nodes
       return @@infer_simple_value_nodes
     end
+
+
+    # @param formula_enum Formula Enumeration
+    # @return [lambda]
+    def symbol_conversion_algorithm=( formula_enum=nil, &block )
+      XmlFu::Node.symbol_conversion_algorithm = (formula_enum ? formula_enum : block)
+    end#symbol_conversion_algorithm
+
+
+    # @return [lambda]
+    def symbol_conversion_algorithm
+      XmlFu::Node.symbol_conversion_algorithm
+    end#symbol_conversion_algorithm
 
   end#class<<self
 end#XmlFu

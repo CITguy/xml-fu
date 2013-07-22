@@ -17,10 +17,11 @@ module XmlFu
 
     # default set of algorithms to choose from
     ALGORITHMS = {
-      :lower_camelcase => lambda { |sym| sym.to_s.lower_camelcase },
       :camelcase => lambda { |sym| sym.to_s.camelcase },
-      :snakecase => lambda { |sym| sym.to_s },
-      :none => lambda { |sym| sym.to_s }
+      :downcase => lambda { |sym| sym.to_s.downcase },
+      :lower_camelcase => lambda { |sym| sym.to_s.lower_camelcase }, # DEFAULT
+      :none => lambda { |sym| sym.to_s },
+      :upcase => lambda { |sym| sym.to_s.upcase }
     }
 
     # Class method for retrieving global Symbol-to-string conversion algorithm
@@ -30,9 +31,15 @@ module XmlFu
     end#self.symbol_conversion_algorithm
 
     # Class method for setting global Symbol-to-string conversion algorithm
-    # @param [lambda] algorithm Should accept a symbol as an argument and return a string
+    # @param [symbol, lambda] algorithm
+    #   Can be symbol corresponding to predefined algorithm or a lambda that accepts a symbol
+    #   as an argument and returns a string
     def self.symbol_conversion_algorithm=(algorithm)
-      algorithm = ALGORITHMS[algorithm] unless algorithm.respond_to?(:call)
+      if algorithm == :default
+        algorithm = ALGORITHMS[:lower_camelcase]
+      else
+        algorithm = ALGORITHMS[algorithm] unless algorithm.respond_to?(:call)
+      end
       raise(ArgumentError, "Invalid symbol conversion algorithm") unless algorithm
       @symbol_conversion_algorithm = algorithm
     end#self.symbol_conversion_algorithm=
@@ -69,8 +76,6 @@ module XmlFu
 
       use_name = name_parse_special_characters(use_name)
 
-      # TODO: Add additional logic that Gyoku XmlKey puts in place 
-     
       # remove ":" if name begins with ":" (i.e. no namespace)
       use_name = use_name[1..-1] if use_name[0,1] == ":"
 
@@ -97,7 +102,7 @@ module XmlFu
 
         # Will this be a self closing node?
         if use_this.to_s[-1,1] == '/'
-          @self_closing = true 
+          @self_closing = true
           use_this.chop!
         end
 
@@ -148,14 +153,14 @@ module XmlFu
       case
       when @self_closing && @content_type == 'container'
         xml.tag!(@name, @attributes)
-      when @value.nil? 
+      when @value.nil?
         xml.tag!(@name, @attributes.merge!("xsi:nil" => "true"))
       when ::Hash === @value
         xml.tag!(@name, @attributes) { xml << XmlFu::Hash.to_xml(@value) }
       when ::Array === @value
         case @content_type
         when "collection"
-          xml << XmlFu::Array.to_xml(@value.flatten, { 
+          xml << XmlFu::Array.to_xml(@value.flatten, {
             :key => (@self_closing ? "#{@name}/" : @name),
             :attributes => @attributes,
             :content_type => "collection"
