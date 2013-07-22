@@ -2,6 +2,7 @@
 *.rbc
 *.swp
 .rvmrc
+.ruby-*
 .bundle
 .config
 .yardoc
