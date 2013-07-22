@@ -1,4 +1,4 @@
-# XmlFu [![Build Status](http://travis-ci.org/CITguy/xml-fu.png)](http://travis-ci.org/CITguy/xml-fu)
+# XmlFu [![Build Status](https://travis-ci.org/CITguy/xml-fu.png?branch=master)](https://travis-ci.org/CITguy/xml-fu)
 
 Convert Ruby Hashes to XML
 
