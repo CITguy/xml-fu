@@ -25,6 +25,23 @@ Or install it yourself as:
 
     $ gem install xml-fu
 
+## BREAKING CHANGES in 0.2.0
+
+Configuration was reworked to be more flexible and provide a centralized object for configuration. As such,
+the configuration options have been moved off of the XmlFu module into the XmlFu.config object. The XmlFu.configure
+method still works the same for setting configurations, but for reading configuration variables, you need to go
+through the XmlFu.config object.
+
+* ADDED
+  * support for OpenStruct conversion
+* REMOVED
+  * infer_simple_value_nodes configuration option
+  * XmlFu::Array.infer_node
+  * XmlFu.parse()
+    * XmlFu is for generation of XML, not parsing.
+* MOVED
+  * configuration options moved to XmlFu.config
+
 
 ## Hash Keys
 
@@ -34,15 +51,16 @@ Hash keys are translated into XML nodes (whether it be a document node or attrib
 ### Key Translation
 
 With Ruby, a hash key may be a string or a symbol.  **Strings will be preserved** as they may
-contain node namespacing ("foo:Bar" would need preserved rather than converted).  Symbols will
-be converted into an XML safe name by lower camel-casing them. So :foo\_bar will become "fooBar".
-You may change the conversion algorithm to your liking by setting the
-XmlFu.symbol\_conversion\_algorithm to a lambda or proc of your liking.
+contain node namespacing ("foo:Bar" would need preserved rather than converted).  There are some
+exceptions to this rule (especially with special key syntax discussed in *Types of Nodes* and the
+like).  Symbols will be converted into an XML safe name by lower camel-casing them. So :foo\_bar
+will become "fooBar".  You may change the conversion algorithm to your liking by setting the
+XmlFu.config.symbol_conversion_algorithm to a lambda or proc of your liking.
 
 
 #### Built-In Algorithms
 
-For a complete list, reference XmlFu::Node::ALGORITHMS
+For a complete list, reference XmlFu::Configuration::ALGORITHMS
 
 * :camelcase
 * :downcase
@@ -57,27 +75,27 @@ XmlFu.xml( :foo_bar => "bang" ) #=> "<fooBar>bang</fooBar>"
 
 
 # Built-in Algorithms (:camelcase)
-XmlFu.symbol_conversion_algorithm = :camelcase
+XmlFu.config.symbol_conversion_algorithm = :camelcase
 XmlFu.xml( :Foo_Bar => "bang" ) #=> "<FooBar>bang</FooBar>"
 XmlFu.xml( :foo_bar => "bang" ) #=> "<FooBar>bang</FooBar>"
 
 
 # Built-in Algorithms (:downcase)
-XmlFu.symbol_conversion_algorithm = :downcase
+XmlFu.config.symbol_conversion_algorithm = :downcase
 XmlFu.xml( :foo_bar => "bang" ) #=> "<foo_bar>bang</foo_bar>"
 XmlFu.xml( :Foo_Bar => "bang" ) #=> "<foo_bar>bang</foo_bar>"
 XmlFu.xml( :FOO => "bar" ) #=> "<foo>bar</foo>"
 
 
 # Built-in Algorithms (:upcase)
-XmlFu.symbol_conversion_algorithm = :upcase
+XmlFu.config.symbol_conversion_algorithm = :upcase
 XmlFu.xml( :foo_bar => "bang" ) #=> "<FOO_BAR>bang</FOO_BAR>"
 XmlFu.xml( :Foo_Bar => "bang" ) #=> "<FOO_BAR>bang</FOO_BAR>"
 XmlFu.xml( :foo => "bar" ) #=> "<FOO>bar</FOO>"
 
 
 # Custom Algorithm
-XmlFu.symbol_conversion_algorithm = lambda {|sym| sym.do_something_special }
+XmlFu.config.symbol_conversion_algorithm = lambda {|sym| sym.do_something_special }
 ```
 
 ### Types of Nodes
@@ -118,6 +136,11 @@ XmlFu.xml("foo!" => "<bar/>") #=> "<foo><bar/></foo>"
 
 Yes, the attributes of an XML node are nodes themselves, so we need a way of defining them. Since XPath syntax
 uses @ to denote an attribute, so does XmlFu.
+
+**Note**: Keep in mind, because of the way that XML::Builder accepts an attributes hash and the way that
+Ruby stores and retrieves values from a Hash, that attributes won't always be generated in the same
+order. We can only guarantee that the attributes will be present, not in any specific order.
+
 
 ``` ruby
 XmlFu.xml(:agent => {
@@ -188,6 +211,14 @@ attribute nodes and additional content will be ignored.
 XmlFu.xml("foo/" => {"@id" => "123", "=" => "You can't see me."})
 #=> "<foo id=\"123\"/>"
 ```
+
+
+### OpenStructs
+
+Since version 0.2.0, support has been added for converting an OpenStruct object. OpenStruct objects behave
+similar to Hashes, but they do not allow the flexibility that Hashes provide when naming keys/methods. As such,
+the advanced naming capabilities are not available with OpenStruct objects and key conversion will go through
+XmlFu.config.symbol_conversion_algorithm.
 
 
 ### Arrays
@@ -271,20 +302,55 @@ are currently ignored in arrays and only Hashes are translated.
 ```ruby
   "foo" => [
     {:bar => "biz"},
-    nil, # ignored
-    true, # ignored
-    false, # ignored
-    42, # ignored
-    3.14, # ignored
-    "simple string", # ignored
+    nil,                              # ignored
+    true,                             # ignored
+    false,                            # ignored
+    42,                               # ignored
+    3.14,                             # ignored
+    "simple string",                  # ignored
     ['another','array','of','values'] # ignored
   ]
   #=> "<foo><bar>biz</bar></foo>"
 ```
 
 ## Options
+
+The following options are available to pass to XmlFu.xml(obj, options).
+
 * **:instruct** => true
-  * Adds &lt;xml version="1.0" encoding="UTF-8"?&gt; to generated XML
+  * Adds &lt;?xml version="1.0" encoding="UTF-8"?&gt; to generated XML
+  * This will be overridden by XmlFu.config.include_xml_declaration
+
+
+## Configuration
+```
+  XmlFu.configure do |config|
+    config.symbol_conversion_algorithm = :default  # (:lower_camelcase)
+    config.fail_on_invalid_construct = false       # (false)
+    config.include_xml_declaration = nil           # (nil)
+  end
+```
+
+### symbol_conversion_algorithm
+
+This is used to convert symbol keys in a Hash to Strings.
+
+
+### fail_on_invalid_construct
+
+When an unsupported object is passed to XmlFu.xml(), the default action is to return nil as
+the result. When fail_on_invalid_construct is enabled, XmlFu.xml() will raise an ArgumentError
+to denote that the passed object is not supported rather than fail silently.
+
+### include_xml_declaration
+
+Deals with adding/excluding &lt;?xml version="1.0" encoding="UTF-8"?&gt; to generated XML
+
+* When enabled, ALWAYS adds declaration to XML
+* When disabled, NEVER adds declaration to XML
+* When nil, control given to XmlFu.xml :instruct option (default)
+
+
 
 
 ## Cheat Sheet

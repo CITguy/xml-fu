@@ -2,12 +2,12 @@ require 'spec_helper'
 
 describe XmlFu do
   after(:each) do
-    XmlFu.symbol_conversion_algorithm = :default
+    XmlFu.config.symbol_conversion_algorithm = :default
   end
 
   describe "with default symbol conversion algorithm" do
     before(:each) do
-      XmlFu.symbol_conversion_algorithm = :default
+      XmlFu.config.symbol_conversion_algorithm = :default
     end
 
     {
@@ -24,7 +24,7 @@ describe XmlFu do
 
   describe "with built-in :camelcase algorithm" do
     before(:each) do
-      XmlFu.symbol_conversion_algorithm = :camelcase
+      XmlFu.config.symbol_conversion_algorithm = :camelcase
     end
 
     {
@@ -41,7 +41,7 @@ describe XmlFu do
 
   describe "with built-in :downcase algorithm" do
     before(:each) do
-      XmlFu.symbol_conversion_algorithm = :downcase
+      XmlFu.config.symbol_conversion_algorithm = :downcase
     end
 
     {
@@ -58,7 +58,7 @@ describe XmlFu do
 
   describe "with built-in :upcase algorithm" do
     before(:each) do
-      XmlFu.symbol_conversion_algorithm = :upcase
+      XmlFu.config.symbol_conversion_algorithm = :upcase
     end
 
     {
@@ -71,5 +71,4 @@ describe XmlFu do
       end
     end
   end#:upcase
-
-end
+end#XmlFu

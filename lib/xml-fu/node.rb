@@ -15,35 +15,6 @@ module XmlFu
     # xs:dateTime format.
     XS_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
-    # default set of algorithms to choose from
-    ALGORITHMS = {
-      :camelcase => lambda { |sym| sym.to_s.camelcase },
-      :downcase => lambda { |sym| sym.to_s.downcase },
-      :lower_camelcase => lambda { |sym| sym.to_s.lower_camelcase }, # DEFAULT
-      :none => lambda { |sym| sym.to_s },
-      :upcase => lambda { |sym| sym.to_s.upcase }
-    }
-
-    # Class method for retrieving global Symbol-to-string conversion algorithm
-    # @return [lambda]
-    def self.symbol_conversion_algorithm
-      @symbol_conversion_algorithm ||= ALGORITHMS[:lower_camelcase]
-    end#self.symbol_conversion_algorithm
-
-    # Class method for setting global Symbol-to-string conversion algorithm
-    # @param [symbol, lambda] algorithm
-    #   Can be symbol corresponding to predefined algorithm or a lambda that accepts a symbol
-    #   as an argument and returns a string
-    def self.symbol_conversion_algorithm=(algorithm)
-      if algorithm == :default
-        algorithm = ALGORITHMS[:lower_camelcase]
-      else
-        algorithm = ALGORITHMS[algorithm] unless algorithm.respond_to?(:call)
-      end
-      raise(ArgumentError, "Invalid symbol conversion algorithm") unless algorithm
-      @symbol_conversion_algorithm = algorithm
-    end#self.symbol_conversion_algorithm=
-
     attr_accessor :escape_xml
     attr_accessor :self_closing
     attr_accessor :content_type
@@ -61,6 +32,7 @@ module XmlFu
       self.name = name
     end#initialize
 
+
     attr_reader :attributes
     def attributes=(val)
       if ::Hash === val
@@ -69,6 +41,7 @@ module XmlFu
         raise(InvalidAttributesException, "Attempted to set attributes to non-hash value")
       end
     end
+
 
     attr_reader :name
     def name=(val)
@@ -80,12 +53,13 @@ module XmlFu
       use_name = use_name[1..-1] if use_name[0,1] == ":"
 
       if Symbol === val
-        use_name = self.class.symbol_conversion_algorithm.call(use_name)
+        use_name = XmlFu.config.symbol_conversion_algorithm.call(use_name)
       end
 
       # Set name to remaining value
       @name = "#{use_name}"
     end#name=
+
 
     # Converts name into proper XML node name
     # @param [String, Symbol] val Raw name
@@ -116,15 +90,17 @@ module XmlFu
       return use_this
     end#name_parse_special_characters
 
+
     # Custom Setter for @value instance method
     def value=(val)
       case val
-      when ::String   then @value = val.to_s
-      when ::Hash     then @value = val
-      when ::Array    then @value = val
-      when ::DateTime then @value = val.strftime XS_DATETIME_FORMAT
-      when ::Time     then @value = val.strftime XS_DATETIME_FORMAT
-      when ::Date     then @value = val.strftime XS_DATETIME_FORMAT
+      when ::String     then @value = val.to_s
+      when ::Hash       then @value = val
+      when ::Array      then @value = val
+      when ::OpenStruct then @value = val
+      when ::DateTime   then @value = val.strftime XS_DATETIME_FORMAT
+      when ::Time       then @value = val.strftime XS_DATETIME_FORMAT
+      when ::Date       then @value = val.strftime XS_DATETIME_FORMAT
       else
         if val.respond_to?(:to_datetime)
           @value = val.to_datetime
@@ -140,12 +116,14 @@ module XmlFu
       @value = val.to_s
     end#value=
 
+
     # @return [String, nil]
     # Value can be nil, else it should return a String value.
     def value
       return CGI.escapeHTML(@value) if String === @value && @escape_xml
       return @value
     end#value
+
 
     # Create XML String from XmlFu::Node object
     def to_xml

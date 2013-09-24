@@ -22,46 +22,24 @@ module XmlFu
         case options[:content_type].to_s
         when "collection"
           raise(MissingKeyException, "Key name missing for collection") if key.empty?
-          
-          case 
-          when ::Array === item
+
+          case item
+          when ::Array then
             xml << Array.to_xml(item.flatten,options)
           else
             xml << Node.new(key, item, attributes).to_xml
           end
         else
           # Array is content of node rather than collection of node elements
-          case
-          when ::Hash === item   
-            xml << Hash.to_xml(item, options)
-          when ::Array === item  
-            xml << Array.to_xml(item, options)
-          when XmlFu.infer_simple_value_nodes == true
-            xml << infer_node(item, attributes)
-          when item.respond_to?(:to_xml)
-            xml << item.to_xml
+          if XmlFu.recognized_object?(item)
+            xml << XmlFu.xml(item, options)
           else
-            # unknown xml tranfromation process
+            # unknown xml transformation
           end
         end
       end
     end#self.to_xml
 
-    # Future Functionality - VERY ALPHA STAGE!!!
-    # @todo Add node inferrance functionality
-    # @note Do not use if you want stable functionality
-    # @param item Simple Value
-    # @param [Hash] attributes Hash of attributes to assign to inferred node.
-    def self.infer_node(item, attributes={})
-      node_name = case item.class
-                  when "TrueClass"
-                  when "FalseClass"
-                    "Boolean"
-                  else
-                    item.class
-                  end
-      Node.new(node_name, item, attributes).to_xml
-    end#self.infer_node
 
     # Convenience function to iterate over array items as well as
     # providing a single location for logic
@@ -74,7 +52,7 @@ module XmlFu
         key = opts.fetch(:key, "")
         item_content = item
 
-        # Attributes reuires duplicate or child elements will 
+        # Attributes reuires duplicate or child elements will
         # contain attributes of their siblings.
         attributes = (opts[:attributes] ? opts[:attributes].dup : {})
 
@@ -84,7 +62,7 @@ module XmlFu
         end
 
         item_name = ( Symbol === key ?
-                     XmlFu::Node.symbol_conversion_algorithm.call(key) :
+                     XmlFu.config.symbol_conversion_algorithm.call(key) :
                      key.to_s )
 
         yield xml, item_name, item_content, attributes

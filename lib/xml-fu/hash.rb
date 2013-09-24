@@ -9,61 +9,67 @@ module XmlFu
   # If order is of concern, use Array.to_xml
   class Hash
 
-    class << self
+    # Convert Hash to XML String
+    def self.to_xml(hash, options={})
+      each_with_xml hash, options do |xml, name, value, attributes|
+        case value
+        when ::OpenStruct then
+          node = Node.new( name, OpenStruct.to_xml(value, options) )
+          # We want the value returned from OpenStruct.to_xml NOT to be escaped
+          node.escape_xml = false
 
-      # Convert Hash to XML String
-      def to_xml(hash, options={})
-        each_with_xml hash, options do |xml, name, value, attributes|
+          xml << node.to_xml
+        else
           xml << Node.new(name, value, attributes).to_xml
         end
-      end#to_xml
+      end
+    end#self.to_xml
 
 
-      # Class method to filter out attributes and content
-      # from a given hash
-      def filter(hash)
-        attribs = {}
-        content = hash.dup
+    # Class method to filter out attributes and content
+    # from a given hash
+    def self.filter(hash)
+      attribs = {}
+      content = hash.dup
 
-        content.keys.select{|k| k =~ /^@/ }.each do |k|
-          attribs[k[1..-1]] = content.delete(k)
+      content.keys.select{|k| k =~ /^@/ }.each do |k|
+        attribs[k[1..-1]] = content.delete(k)
+      end
+
+      # Use _content value if defined
+      content = content.delete("=") || content
+
+      return [content, attribs]
+    end#self.filter
+
+  private
+
+    # Provides a convenience function to iterate over the hash
+    # Logic will filter out attribute and content keys from hash values
+    def self.each_with_xml(hash, opts={})
+      xml = XmlFu::Markup.new(opts)
+
+      hash.each do |key,value|
+        node_value = value
+        node_attrs = {}
+
+        # yank the attribute keys into their own hash
+        if value.respond_to?(:keys)
+          filtered = Hash.filter(value)
+          node_value, node_attrs = filtered.first, filtered.last
         end
 
-        # Use _content value if defined
-        content = content.delete("=") || content
+        # Use symbol conversion algorithm to set tag name
+        node_name = ( Symbol === key ?
+                     XmlFu.config.symbol_conversion_algorithm.call(key) :
+                     key.to_s )
 
-        return [content, attribs]
-      end#filter
+        yield xml, node_name, node_value, node_attrs
+      end
 
-    private
+      xml.target!
+    end#self.each_with_xml
 
-      # Provides a convenience function to iterate over the hash
-      # Logic will filter out attribute and content keys from hash values
-      def each_with_xml(hash, opts={})
-        xml = XmlFu::Markup.new(opts)
-
-        hash.each do |key,value|
-          node_value = value
-          node_attrs = {}
-
-          # yank the attribute keys into their own hash
-          if value.respond_to?(:keys)
-            filtered = Hash.filter(value)
-            node_value, node_attrs = filtered.first, filtered.last
-          end
-
-          # Use symbol conversion algorithm to set tag name
-          node_name = ( Symbol === key ?
-                       XmlFu::Node.symbol_conversion_algorithm.call(key) :
-                       key.to_s )
-
-          yield xml, node_name, node_value, node_attrs
-        end
-
-        xml.target!
-      end#each_with_xml
-
-    end#class << self
 
   end#Hash
 

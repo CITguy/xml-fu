@@ -1,75 +1,69 @@
 #require "xml-fu/version"
 require "xml-fu/hash"
+require "xml-fu/open_struct"
 require "xml-fu/array"
 require "xml-fu/markup"
+require "xml-fu/configuration"
 
 module XmlFu
-  class << self
 
-    # Convert construct into XML
-    def xml(construct, options={})
-      case construct
-      when ::Hash   then Hash.to_xml( construct.dup, options )
-      when ::Array  then Array.to_xml( construct.dup, options )
-      else nil
+  # Convert construct into XML
+  def self.xml(construct, options={})
+
+    # Override options for xml_declaration if config is present
+    unless self.config.include_xml_declaration.nil?
+      options[:instruct] = self.config.include_xml_declaration
+    end
+
+    case construct
+    when ::OpenStruct then
+      OpenStruct.to_xml( construct.dup, options )
+    when ::Hash then
+      Hash.to_xml( construct.dup, options )
+    when ::Array then
+      Array.to_xml( construct.dup, options )
+    else
+      if construct.respond_to?(:to_xml)
+        construct.to_xml
+      else
+        # Options have been exhausted
+        if self.config.fail_on_invalid_construct
+          raise ArgumentError, "Invalid construct"
+        else
+          nil
+        end
       end
-    end#convert
-
-    # @todo Add Nori-like parsing capability to convert XML back into XmlFu-compatible Hash/Array
-    # Parse XML into array of hashes.  If XML used as input contains only sibling nodes, output
-    # will be array of hashes corresponding to those sibling nodes.
-    #
-    #     <foo/><bar/> => [{"foo/" => ""}, {"bar/" => ""}]
-    #
-    # If XML used as input contains a full document with root node, output will be
-    # an array of one hash (the root node hash)
-    #
-    #     <foo><bar/><baz/></foo> => [{"foo" => [{"bar/" => ""},{"baz/" => ""}] }]
-    def parse(xml=nil, options={})
-      parsed_xml = xml
-
-      return Array(parsed_xml)
     end
+  end#self.xml
 
-    def configure
-      yield self
+
+  # Used to determine if the top-level #xml method recognizes the passed object
+  def self.recognized_object?(obj)
+    case obj
+    when ::Hash       then return true
+    when ::Array      then return true
+    when ::OpenStruct then return true
+    else
+      return true if obj.respond_to?(:to_xml)
+      return false
     end
-
-    ################################################################################
-    ## CONFIGURATIONS
-    ################################################################################
-
-    @@infer_simple_value_nodes = false
-
-    # Set configuration option to be used with future releases
-    def infer_simple_value_nodes=(val)
-      @@infer_simple_value_nodes = val
-    end
-
-    # Configuration option to be used with future releases
-    # This option should allow for the inferrance of parent node names of simple value types
-    #
-    # Example:
-    #     1 => <Integer>1</Integer>
-    #     true => <Boolean>true</Boolean>
-    #
-    # This is disabled by default as it is conflicting with working logic.
-    def infer_simple_value_nodes
-      return @@infer_simple_value_nodes
-    end
+  end#self.recognized_object?
 
 
-    # @param formula_enum Formula Enumeration
-    # @return [lambda]
-    def symbol_conversion_algorithm=( formula_enum=nil, &block )
-      XmlFu::Node.symbol_conversion_algorithm = (formula_enum ? formula_enum : block)
-    end#symbol_conversion_algorithm
+  ################################################################################
+  ## CONFIGURATIONS
+  ################################################################################
+
+  # Modify configuration for library
+  # @yield [Configuration]
+  def self.configure
+    yield self.config if block_given?
+  end#configure
 
 
-    # @return [lambda]
-    def symbol_conversion_algorithm
-      XmlFu::Node.symbol_conversion_algorithm
-    end#symbol_conversion_algorithm
+  def self.config
+    @@config ||= Configuration.new
+  end#self.config
 
-  end#class<<self
+
 end#XmlFu
