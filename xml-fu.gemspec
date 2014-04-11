@@ -21,6 +21,7 @@ Gem::Specification.new do |gem|
 
   gem.add_development_dependency "rspec", ">= 2.4.0"
   gem.add_development_dependency "rake"
+  gem.add_development_dependency "coveralls"
 
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   gem.files         = `git ls-files`.split("\n")

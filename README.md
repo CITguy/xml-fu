@@ -1,4 +1,6 @@
-# XmlFu [![Build Status](https://travis-ci.org/CITguy/xml-fu.png?branch=master)](https://travis-ci.org/CITguy/xml-fu)
+# XmlFu 
+[![Build Status](https://travis-ci.org/CITguy/xml-fu.png?branch=master)](https://travis-ci.org/CITguy/xml-fu)
+[![Coverage Status](https://coveralls.io/repos/CITguy/xml-fu/badge.png?branch=master)](https://coveralls.io/r/CITguy/xml-fu?branch=master)
 
 *license:* MIT
 
