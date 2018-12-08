@@ -2,7 +2,6 @@
 [![Gem Version](https://badge.fury.io/rb/xml-fu.png)](http://badge.fury.io/rb/xml-fu)
 [![Build Status](https://travis-ci.org/CITguy/xml-fu.png?branch=master)](https://travis-ci.org/CITguy/xml-fu)
 [![Coverage Status](https://coveralls.io/repos/CITguy/xml-fu/badge.png?branch=master)](https://coveralls.io/r/CITguy/xml-fu?branch=master)
-[![Dependency Status](https://gemnasium.com/CITguy/xml-fu.svg)](https://gemnasium.com/CITguy/xml-fu)
 
 *license:* MIT
 
