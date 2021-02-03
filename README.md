@@ -31,19 +31,19 @@ Or install it yourself as:
 ## BREAKING CHANGES in 0.2.0
 
 Configuration was reworked to be more flexible and provide a centralized object for configuration. As such,
-the configuration options have been moved off of the XmlFu module into the XmlFu.config object. The XmlFu.configure
+the configuration options have been moved off of the `XmlFu` module into the `XmlFu.config` object. The `XmlFu.configure`
 method still works the same for setting configurations, but for reading configuration variables, you need to go
-through the XmlFu.config object.
+through the `XmlFu.config` object.
 
 * ADDED
-  * support for OpenStruct conversion
+    * support for OpenStruct conversion
 * REMOVED
-  * infer_simple_value_nodes configuration option
-  * XmlFu::Array.infer_node
-  * XmlFu.parse()
-    * XmlFu is for generation of XML, not parsing.
+    * `infer_simple_value_nodes` configuration option
+    * `XmlFu::Array.infer_node`
+    * `XmlFu.parse()`
+        * XmlFu is for generation of XML, not parsing.
 * MOVED
-  * configuration options moved to XmlFu.config
+    * configuration options moved to `XmlFu.config`
 
 
 ## Hash Keys
@@ -54,26 +54,26 @@ Hash keys are translated into XML nodes (whether it be a document node or attrib
 ### Key Translation
 
 With Ruby, a hash key may be a string or a symbol.  **Strings will be preserved** as they may
-contain node namespacing ("foo:Bar" would need preserved rather than converted).  There are some
+contain node namespacing (`<foo:Bar>` would need preserved rather than converted).  There are some
 exceptions to this rule (especially with special key syntax discussed in *Types of Nodes* and the
-like).  Symbols will be converted into an XML safe name by lower camel-casing them. So :foo\_bar
-will become "fooBar".  You may change the conversion algorithm to your liking by setting the
-XmlFu.config.symbol_conversion_algorithm to a lambda or proc of your liking.
+like).  Symbols will be converted into an XML safe name by lower camel-casing them. So `:foo_bar`
+will become `fooBar`.  You may change the conversion algorithm to your liking by setting the
+`XmlFu.config.symbol_conversion_algorithm` to a lambda or proc of your liking.
 
 
 #### Built-In Algorithms
 
-For a complete list, reference XmlFu::Configuration::ALGORITHMS
+For a complete list, reference `XmlFu::Configuration::ALGORITHMS`
 
-* :camelcase
-* :downcase
-* :lower\_camelcase **(default)**
-* :none (result of :sym.to\_s)
-* :upcase
+* `:camelcase`
+* `:downcase`
+* `:lower_camelcase` **(default)**
+* `:none` (result of `:sym.to_s`)
+* `:upcase`
 
 ```ruby
 # Default Algorithm (:lower_camelcase)
-XmlFu.xml( :FooBar => "bang" ) #=> "<fooBar>bang</fooBar>"
+XmlFu.xml( :FooBar => "bang" )  #=> "<fooBar>bang</fooBar>"
 XmlFu.xml( :foo_bar => "bang" ) #=> "<fooBar>bang</fooBar>"
 
 
@@ -87,14 +87,14 @@ XmlFu.xml( :foo_bar => "bang" ) #=> "<FooBar>bang</FooBar>"
 XmlFu.config.symbol_conversion_algorithm = :downcase
 XmlFu.xml( :foo_bar => "bang" ) #=> "<foo_bar>bang</foo_bar>"
 XmlFu.xml( :Foo_Bar => "bang" ) #=> "<foo_bar>bang</foo_bar>"
-XmlFu.xml( :FOO => "bar" ) #=> "<foo>bar</foo>"
+XmlFu.xml( :FOO => "bar" )      #=> "<foo>bar</foo>"
 
 
 # Built-in Algorithms (:upcase)
 XmlFu.config.symbol_conversion_algorithm = :upcase
 XmlFu.xml( :foo_bar => "bang" ) #=> "<FOO_BAR>bang</FOO_BAR>"
 XmlFu.xml( :Foo_Bar => "bang" ) #=> "<FOO_BAR>bang</FOO_BAR>"
-XmlFu.xml( :foo => "bar" ) #=> "<FOO>bar</FOO>"
+XmlFu.xml( :foo => "bar" )      #=> "<FOO>bar</FOO>"
 
 
 # Custom Algorithm
@@ -126,24 +126,28 @@ By default, if you pass a pure string as a value, special characters will be esc
 If you know that the string is valid XML and can be trusted, you can add the exclamation point to the end of
 the key name to denote that XmlFu should NOT escape special characters in the value.
 
-```ruby
-# Default Functionality (Escaped Characters)
-XmlFu.xml("foo" => "<bar/>") #=> "<foo>&lt;bar/&gt;</foo>"
 
-# Unescaped Characters
-XmlFu.xml("foo!" => "<bar/>") #=> "<foo><bar/></foo>"
+##### Default Functionality (Escaped Characters)
+
+```ruby
+XmlFu.xml("foo" => "<bar/>") #=> <foo>&lt;bar/&gt;</foo>
+```
+
+##### Unescaped Characters
+
+```ruby
+XmlFu.xml("foo!" => "<bar/>") #=> <foo><bar/></foo>
 ```
 
 
 #### Attribute Node (@key)
 
 Yes, the attributes of an XML node are nodes themselves, so we need a way of defining them. Since XPath syntax
-uses @ to denote an attribute, so does XmlFu.
+uses `@` to denote an attribute, so does XmlFu.
 
-**Note**: Keep in mind, because of the way that XML::Builder accepts an attributes hash and the way that
-Ruby stores and retrieves values from a Hash, that attributes won't always be generated in the same
-order. We can only guarantee that the attributes will be present, not in any specific order.
-
+**Note**: Keep in mind, because of the way that `XML::Builder` accepts an attributes hash and the way that
+Ruby stores and retrieves values from a Hash, attributes won't always be generated in the same order. 
+We can only guarantee that the attributes will be _present_, not in any specific order.
 
 ``` ruby
 XmlFu.xml(:agent => {
@@ -151,40 +155,44 @@ XmlFu.xml(:agent => {
   "FirstName" => "James",
   "LastName" => "Bond"
 })
-#=> <agent id="007"><FirstName>James</FirstName><LastName>Bond</LastName></agent>
+```
+
+```xml
+<agent id="007">
+  <FirstName>James</FirstName>
+  <LastName>Bond</LastName>
+</agent>
 ```
 
 
 ## Hash Values
-
 The value in a key/value pair describes the key/node. Different value types determine the extent of this description.
 
 
 ### Simple Values
-
 Simple value types describe the contents of the XML node.
 
 
 #### Strings
 
 ``` ruby
-XmlFu.xml( :foo => "bar" ) #=> "<foo>bar</foo>"
-XmlFu.xml( "foo" => "bar" ) #=> "<foo>bar</foo>"
+XmlFu.xml( :foo => "bar" )  #=> <foo>bar</foo>
+XmlFu.xml( "foo" => "bar" ) #=> <foo>bar</foo>
 ```
 
 
 #### Numbers
 
 ``` ruby
-XmlFu.xml( :foo => 0 ) #=> "<foo>0</foo>"
-XmlFu.xml( :pi => 3.14159 ) #=> "<pi>3.14159</pi>"
+XmlFu.xml( :foo => 0 )      #=> <foo>0</foo>
+XmlFu.xml( :pi => 3.14159 ) #=> <pi>3.14159</pi>
 ```
 
 
 #### Nil
 
 ``` ruby
-XmlFu.xml( :foo => nil ) #=> "<foo xsi:nil=\"true\"/>"
+XmlFu.xml( :foo => nil ) #=> <foo xsi:nil="true"/>
 ```
 
 
@@ -193,26 +201,50 @@ XmlFu.xml( :foo => nil ) #=> "<foo xsi:nil=\"true\"/>"
 Hash are parsed for their translated values prior to returning a XmlFu value.
 
 ```ruby
-XmlFu.xml(:foo => {:bar => {:biz => "bang"} })
-#=> "<foo><bar><biz>bang</biz></bar></foo>"
+XmlFu.xml(:foo => {
+  :bar => {
+    :biz => "bang"
+  }
+})
+```
+
+```xml
+<foo>
+  <bar>
+    <biz>bang</biz>
+  </bar>
+</foo>
 ```
 
 #### Content in Hash (=)
 
-Should you require setting node attributes as well as setting the value of the XML node, you may use the "="
+Should you require setting node attributes as well as setting the value of the XML node, you may use the `=`
 key in a nested hash to denote explicit content.
 
 ```ruby
-XmlFu.xml(:agent => {"@id" => "007", "=" => "James Bond"})
-#=> "<agent id=\"007\">James Bond</agent>"
+XmlFu.xml(:agent => {
+  "@id" => "007", 
+  "=" => "James Bond"
+})
+```
+
+```xml
+<agent id="007">James Bond</agent>
 ```
 
 This key will not get around the self-closing node rule. The only nodes that will be used in this case will be
-attribute nodes and additional content will be ignored.
+attribute nodes (additional content will be ignored).
+
 
 ```ruby
-XmlFu.xml("foo/" => {"@id" => "123", "=" => "You can't see me."})
-#=> "<foo id=\"123\"/>"
+XmlFu.xml("foo/" => {
+  "@id" => "123", 
+  "=" => "You can't see me."  # ignored (node is self-closing)
+})
+```
+
+```xml
+<foo id="123"/>
 ```
 
 
@@ -221,25 +253,31 @@ XmlFu.xml("foo/" => {"@id" => "123", "=" => "You can't see me."})
 Since version 0.2.0, support has been added for converting an OpenStruct object. OpenStruct objects behave
 similar to Hashes, but they do not allow the flexibility that Hashes provide when naming keys/methods. As such,
 the advanced naming capabilities are not available with OpenStruct objects and key conversion will go through
-XmlFu.config.symbol_conversion_algorithm.
+`XmlFu.config.symbol_conversion_algorithm`.
 
 
 ### Arrays
 
-Since the value in a key/value pair is (for the most part) used as the contents of a key/node, there are some
+Since the value in a key/value pair is (for the most part) used as the contents of a node, there are some
 assumptions that XmlFu makes when dealing with Array values.
 
-* For a typical key, the contents of the array are considered to be nodes to be contained within the <key> node.
+* For a typical key, the contents of the array are considered to be nodes to be contained within the `<key>` node.
 
 
 #### Array of Hashes
 
-``` ruby
+```ruby
 XmlFu.xml( "SecretAgents" => [
   { "agent/" => { "@id"=>"006", "@name"=>"Alec Trevelyan" } },
   { "agent/" => { "@id"=>"007", "@name"=>"James Bond" } }
 ])
-#=> "<SecretAgents><agent name=\"Alec Trevelyan\" id=\"006\"/><agent name=\"James Bond\" id=\"007\"/></SecretAgents>"
+```
+
+```xml
+<SecretAgents>
+  <agent name="Alec Trevelyan" id="006"/>
+  <agent name="James Bond" id="007"/>
+</SecretAgents>
 ```
 
 
@@ -251,11 +289,15 @@ collection of &lt;key&gt; nodes.
 
 ```ruby
 XmlFu.xml( "person*" => ["Bob", "Sheila"] )
-#=> "<person>Bob</person><person>Sheila</person>"
+```
+
+```xml
+<person>Bob</person>
+<person>Sheila</person>
 ```
 
 In this case, the value of "person*" is an array of two names. These names are to be the contents of multiple
-&lt;person&gt; nodes and the result is a set of sibling XML nodes with no parent.
+`<person>` nodes and the result is a set of sibling XML nodes with no parent.
 
 How about a more complex example:
 
@@ -264,13 +306,21 @@ XmlFu.xml(
   "person*" => {
     "@foo" => "bar",
     "=" => [
-      {"@foo" => "nope", "=" => "Bob"},
+      { 
+        "@foo" => "nope", # override default
+        "=" => "Bob"
+      },
       "Sheila"
     ]
   }
 )
-#=> "<person foo=\"nope\">Bob</person><person foo=\"bar\">Sheila</person>"
 ```
+
+```xml
+<person foo="nope">Bob</person>
+<person foo="bar">Sheila</person>
+```
+
 
 *This is getting interesting, isn't it?* In this example, we are setting a default "foo" attribute on each of the
 items in the collection of &lt;person&gt; nodes. However, you'll notice that we overwrote the default "foo" with Bob.
@@ -291,10 +341,20 @@ XmlFu.xml(
     ]
   ]
 )
-#=> "<foo><a/><b/><c/><d/><e/><f/></foo>"
 ```
 
-:foo in this case, is the parent node of it's contents
+```xml
+<foo>
+  <a/>
+  <b/>
+  <c/>
+  <d/>
+  <e/>
+  <f/>
+</foo>
+```
+
+`:foo` in this case, is the parent node of its contents
 
 
 #### Array of Mixed Types
@@ -303,55 +363,60 @@ Since with simple values, you cannot infer the value of their node container pur
 are currently ignored in arrays and only Hashes are translated.
 
 ```ruby
-  "foo" => [
-    {:bar => "biz"},
-    nil,                              # ignored
-    true,                             # ignored
-    false,                            # ignored
-    42,                               # ignored
-    3.14,                             # ignored
-    "simple string",                  # ignored
-    ['another','array','of','values'] # ignored
-  ]
-  #=> "<foo><bar>biz</bar></foo>"
+XmlFu.xml("foo" => [
+  {:bar => "biz"},
+  nil,                              # ignored
+  true,                             # ignored
+  false,                            # ignored
+  42,                               # ignored
+  3.14,                             # ignored
+  "simple string",                  # ignored
+  ['another','array','of','values'] # ignored
+])
+```
+
+```xml
+<foo>
+  <bar>biz</bar>
+</foo>
 ```
 
 ## Options
 
 The following options are available to pass to XmlFu.xml(obj, options).
 
-* **:instruct** => true
-  * Adds &lt;?xml version="1.0" encoding="UTF-8"?&gt; to generated XML
-  * This will be overridden by XmlFu.config.include_xml_declaration
+* **`:instruct`** => true
+  * Adds `<xml version="1.0" encoding="UTF-8"?>` to generated XML
+  * This will be overridden by `XmlFu.config.include_xml_declaration`
 
 
 ## Configuration
 ```
-  XmlFu.configure do |config|
-    config.symbol_conversion_algorithm = :default  # (:lower_camelcase)
-    config.fail_on_invalid_construct = false       # (false)
-    config.include_xml_declaration = nil           # (nil)
-  end
+XmlFu.configure do |config|
+  config.symbol_conversion_algorithm = :default  # (:lower_camelcase)
+  config.fail_on_invalid_construct = false       # (false)
+  config.include_xml_declaration = nil           # (nil)
+end
 ```
 
-### symbol_conversion_algorithm
+### symbol\_conversion\_algorithm
 
 This is used to convert symbol keys in a Hash to Strings.
 
 
-### fail_on_invalid_construct
+### fail\_on\_invalid_construct
 
-When an unsupported object is passed to XmlFu.xml(), the default action is to return nil as
-the result. When fail_on_invalid_construct is enabled, XmlFu.xml() will raise an ArgumentError
+When an unsupported object is passed to `XmlFu.xml()`, the default action is to return `nil` as
+the result. When `fail_on_invalid_construct` is enabled, `XmlFu.xml()` will raise an ArgumentError
 to denote that the passed object is not supported rather than fail silently.
 
-### include_xml_declaration
+### include\_xml\_declaration
 
-Deals with adding/excluding &lt;?xml version="1.0" encoding="UTF-8"?&gt; to generated XML
+Deals with adding/excluding `<?xml version="1.0" encoding="UTF-8"?>` to generated XML
 
-* When enabled, ALWAYS adds declaration to XML
-* When disabled, NEVER adds declaration to XML
-* When nil, control given to XmlFu.xml :instruct option (default)
+* When `true`, ALWAYS adds declaration to XML
+* When `false`, NEVER adds declaration to XML
+* When `nil`, control is given to `:instruct` option of `XmlFu.xml()` (default)
 
 
 
@@ -360,24 +425,24 @@ Deals with adding/excluding &lt;?xml version="1.0" encoding="UTF-8"?&gt; to gene
 
 ### Key
   1. if key denotes self-closing node (key/)
-    * attributes are preserved with Hash values
-    * value and "=" values are ignored
+      * attributes are preserved with Hash values
+      * value and `=` values are ignored
   2. if key denotes collection (key*) with Array value
-    * Array is flattened
-    * Only Hash and Simple values are translated
-    * Hashes may override default attributes set by parent
-    * **(applies to Array values only)**
+      * Array is flattened
+      * Only Hash and Simple values are translated
+      * Hashes may override default attributes set by parent
+      * **(applies to Array values only)**
   3. if key denotes contents (key) with Array value
-    * Array is flattened
-    * Only Hash items in array are translated
+      * Array is flattened
+      * Only Hash items in array are translated
 
 ### Value
   1. if value is Hash:
-    * "@" keys are attributes of the node
-    * "=" key can be used in conjunction with any "@" keys to specify content of node
-  3. if value is simple value:
-    * it is content of <key> node
-    * **unless:** key denotes a self-closing node
+      * `@` keys are node _attributes_
+      * `=` key can be used to specify node _content_
+  2. if value is simple value:
+      * it is the node content
+      * **unless:** key denotes a self-closing node
 
 
 ## Contributing
