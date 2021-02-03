@@ -391,7 +391,7 @@ The following options are available to pass to XmlFu.xml(obj, options).
 
 
 ## Configuration
-```
+```ruby
 XmlFu.configure do |config|
   config.symbol_conversion_algorithm = :default  # (:lower_camelcase)
   config.fail_on_invalid_construct = false       # (false)
