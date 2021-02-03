@@ -46,6 +46,20 @@ through the `XmlFu.config` object.
     * configuration options moved to `XmlFu.config`
 
 
+# Documentation
+
+* [Hash Keys](#hash-keys)
+    * [Key Translation](#key-translation)
+    * [Types of Nodes](#types-of-nodes)
+* [Hash Values](#hash-values)
+    * [Simple Values](#simple-values)
+    * [Hashes](#hashes)
+    * [OpenStructs](#openstructs)
+    * [Arrays](#arrays)
+* [Options](#options)
+* [Configuration](#configuration)
+* [Cheat Sheet](#cheat-sheet)
+
 ## Hash Keys
 
 Hash keys are translated into XML nodes (whether it be a document node or attribute node).
@@ -383,12 +397,12 @@ XmlFu.xml("foo" => [
 
 ## Options
 
-The following options are available to pass to XmlFu.xml(obj, options).
+The following options are available to pass to `XmlFu.xml(obj, options)`.
 
-* **`:instruct`** => true
-  * Adds `<xml version="1.0" encoding="UTF-8"?>` to generated XML
-  * This will be overridden by `XmlFu.config.include_xml_declaration`
-
+* `:instruct`
+    * if `true`:
+        * Adds `<xml version="1.0" encoding="UTF-8"?>` to generated XML
+    * This will be overridden by `XmlFu.config.include_xml_declaration`
 
 ## Configuration
 ```ruby
